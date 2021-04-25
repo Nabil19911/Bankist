@@ -185,7 +185,16 @@ btnTransfer.addEventListener('click', e => {
 // LOAN
 btnLoan.addEventListener('click', e => {
   e.preventDefault();
-  console.log('Loaned');
+  const amount = +inputLoanAmount.value;
+  const isValid = currentAccount.movements.some(acc => acc >= amount / 10);
+  console.log(isValid);
+  if (amount > 0 && isValid) {
+    currentAccount.movements.push(amount);
+    setTimeout(() => {
+      updateUI(currentAccount);
+    }, 2000);
+  }
+  inputLoanAmount.value = '';
 });
 
 // DELETE
@@ -202,6 +211,22 @@ btnClose.addEventListener('click', e => {
     accounts.splice(index, 1);
   }
   inputCloseUsername.value = inputClosePin.value = '';
+});
+
+// SORT
+btnSort.addEventListener('click', e => {
+  e.preventDefault();
+  currentAccount.movements.sort((a, b) => {
+    if (a > b) {
+      return 1;
+    }
+    if (b > a) {
+      return -1;
+    }
+  });
+  setTimeout(() => {
+    updateUI(currentAccount);
+  }, 500);
 });
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
