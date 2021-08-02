@@ -100,17 +100,26 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 // Update the HTML DOM
-const displayMovements = (movements, sort = false) => {
+const displayMovements = (acc, sort = false) => {
   containerMovements.innerHTML = '';
-  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  const movs = sort
+    ? acc.movements.slice().sort((a, b) => a - b)
+    : acc.movements;
   movs.forEach((mov, i) => {
+    // Get date
+    let now = new Date(acc.movementsDates[i]);
+    let date = `${now.getDate()}`.padStart(2, 0);
+    let month = `${now.getMonth()}`.padStart(2, 0);
+    let year = now.getFullYear();
+    let displayDate = `${date}/${month}/${year}`;
+
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const html = `
           <div class="movements__row">
             <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-            <div class="movements__date">3 days ago</div>
+            <div class="movements__date">${displayDate}</div>
             <div class="movements__value">${mov.toFixed(2)}€</div>
           </div>
     `;
@@ -159,7 +168,7 @@ createUserName(accounts);
 
 // Update the UI
 const updateUI = acc => {
-  displayMovements(acc.movements);
+  displayMovements(acc);
   calcDispalyBalance(acc);
   calcDisplaySummary(acc);
 };
@@ -173,7 +182,13 @@ btnLogin.addEventListener('click', e => {
   );
   // console.log(currentAccount);
   if (currentAccount?.pin === +inputLoginPin.value) {
-    // Update ui
+    // Current date
+    let currentDate = new Date();
+    let date = `${currentDate.getDate()}`.padStart(2, 0);
+    let month = `${currentDate.getMonth()}`.padStart(2, 0);
+    let year = currentDate.getFullYear();
+    labelDate.textContent = `${date}/${month}/${year}`;
+    // Update UI
     updateUI(currentAccount);
     labelWelcome.textContent = `Welcome back, ${
       currentAccount.owner.split(' ')[0]
@@ -212,6 +227,7 @@ btnTransfer.addEventListener('click', e => {
     transferTo?.username !== currentAccount.value
   ) {
     // Push to movement array
+    currentAccount.movementsDates.push(new Date().toISOString());
     currentAccount.movements.push(-amount);
     transferTo.movements.push(amount);
 
@@ -228,7 +244,9 @@ btnLoan.addEventListener('click', e => {
   const isValid = currentAccount.movements.some(acc => acc >= amount / 10);
   console.log(isValid);
   if (amount > 0 && isValid) {
+    currentAccount.movementsDates.push(new Date().toISOString());
     currentAccount.movements.push(amount);
+
     setTimeout(() => {
       updateUI(currentAccount);
     }, 2000);
