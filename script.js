@@ -100,7 +100,7 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 // Update the HTML DOM
-const dateFormate = now => {
+const dateFormate = (now, locale) => {
   const calcDate = (date1, date2) =>
     Math.round(Math.abs((date2 - date1) / (1000 * 60 * 60 * 24)));
 
@@ -109,10 +109,7 @@ const dateFormate = now => {
   if (passedDate === 1) return 'Yesterday';
   if (passedDate <= 7) return `${passedDate} days ago`;
 
-  let date = `${now.getDate()}`.padStart(2, 0);
-  let month = `${now.getMonth() + 1}`.padStart(2, 0);
-  let year = now.getFullYear();
-  return `${date}/${month}/${year}`;
+  return new Intl.DateTimeFormat(locale).format(now);
 };
 
 const displayMovements = (acc, sort = false) => {
@@ -123,7 +120,7 @@ const displayMovements = (acc, sort = false) => {
   movs.forEach((mov, i) => {
     // Get date
     let now = new Date(acc.movementsDates[i]);
-    let displayDate = dateFormate(now);
+    let displayDate = dateFormate(now, acc.locale);
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const html = `
           <div class="movements__row">
@@ -195,10 +192,17 @@ btnLogin.addEventListener('click', e => {
   if (currentAccount?.pin === +inputLoginPin.value) {
     // Current date
     let currentDate = new Date();
-    let date = `${currentDate.getDate()}`.padStart(2, 0);
-    let month = `${currentDate.getMonth() + 1}`.padStart(2, 0);
-    let year = currentDate.getFullYear();
-    labelDate.textContent = `${date}/${month}/${year}`;
+    let option = {
+      hour: 'numeric',
+      minute: 'numeric',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    };
+    labelDate.textContent = new Intl.DateTimeFormat(
+      currentAccount.locale,
+      option
+    ).format(currentDate);
     // Update UI
     updateUI(currentAccount);
     labelWelcome.textContent = `Welcome back, ${
