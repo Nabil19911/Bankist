@@ -120,7 +120,13 @@ const displayMovements = (acc, sort = false) => {
   movs.forEach((mov, i) => {
     // Get date
     let now = new Date(acc.movementsDates[i]);
+    // Date Formate
     let displayDate = dateFormate(now, acc.locale);
+    // Currency Formate
+    let formateCurrency = new Intl.NumberFormat(acc.locale, {
+      style: 'currency',
+      currency: acc.currency,
+    }).format(mov);
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const html = `
           <div class="movements__row">
@@ -128,7 +134,7 @@ const displayMovements = (acc, sort = false) => {
       i + 1
     } ${type}</div>
             <div class="movements__date">${displayDate}</div>
-            <div class="movements__value">${mov.toFixed(2)}€</div>
+            <div class="movements__value">${formateCurrency}</div>
           </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
