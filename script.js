@@ -208,8 +208,32 @@ const updateUI = acc => {
   calcDisplaySummary(acc);
 };
 
+// LoginTimer
+const startLogOutTimer = () => {
+  const tick = () => {
+    const min = String(Math.trunc(logOutTime / 60)).padStart(2, 0);
+    const second = String(logOutTime % 60).padStart(2, 0);
+    labelTimer.textContent = `${min}:${second}`;
+
+    if (logOutTime === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Log in to get started';
+      inputLoginUsername.value = inputLoginPin.value = '';
+      inputLoginPin.blur();
+      containerApp.style.opacity = 0;
+    }
+    logOutTime--;
+  };
+  // Logout time
+  let logOutTime = 120;
+  tick();
+  const timer = setInterval(tick, 1000);
+  return timer;
+};
+
 // LOGIN EVENT
-let currentAccount;
+let currentAccount, timer;
+
 btnLogin.addEventListener('click', e => {
   e.preventDefault();
   currentAccount = accounts.find(
@@ -230,6 +254,9 @@ btnLogin.addEventListener('click', e => {
       currentAccount.locale,
       option
     ).format(currentDate);
+    // Start LogOut Tmer
+    if (timer) clearInterval(timer);
+    timer = startLogOutTimer();
     // Update UI
     updateUI(currentAccount);
     labelWelcome.textContent = `Welcome back, ${
@@ -278,6 +305,8 @@ btnTransfer.addEventListener('click', e => {
       updateUI(currentAccount);
     }, 1000);
   }
+  clearInterval(timer);
+  timer = startLogOutTimer();
 });
 // LOAN
 btnLoan.addEventListener('click', e => {
@@ -294,6 +323,8 @@ btnLoan.addEventListener('click', e => {
     }, 2000);
   }
   inputLoanAmount.value = '';
+  clearInterval(timer);
+  timer = startLogOutTimer();
 });
 
 // DELETE
@@ -308,6 +339,7 @@ btnClose.addEventListener('click', e => {
     );
     containerApp.style.opacity = 0;
     accounts.splice(index, 1);
+    labelWelcome.textContent = `Log in to get started`;
   }
   inputCloseUsername.value = inputClosePin.value = '';
 });
@@ -325,6 +357,8 @@ btnSort.addEventListener('click', e => {
   // }
   displayMovements(currentAccount.movements, !sorted);
   sorted = !sorted;
+  clearInterval(timer);
+  timer = startLogOutTimer();
 });
 /////////////////////////////////////////////////
 
